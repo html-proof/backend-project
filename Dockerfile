@@ -23,5 +23,5 @@ COPY . .
 # Expose port (Optional, Railway sets PORT)
 EXPOSE 8000
 
-# Start command
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start command (Use shell to expand $PORT)
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
