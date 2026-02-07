@@ -9,16 +9,50 @@ class FirebaseDB:
     def __init__(self):
         # Check if already initialized to avoid re-init errors
         if not firebase_admin._apps:
-            # Try to get credentials from file
-            cred_path = os.getenv("FIREBASE_SERVICE_KEY")
+            # Try to get credentials from Environment Variables (Best for Railway/Cloud)
+            cred = None
             db_url = os.getenv("FIREBASE_DB_URL")
-            
-            if not cred_path or not db_url:
-                print("Warning: FIREBASE_SERVICE_KEY or FIREBASE_DB_URL not set.")
+
+            # Option A: Base64 Encoded JSON (Best for multiline JSON in envs)
+            cred_base64 = os.getenv("FIREBASE_CREDENTIALS_BASE64")
+            if cred_base64:
+                import base64
+                import json
+                try:
+                    json_str = base64.b64decode(cred_base64).decode('utf-8')
+                    cred_dict = json.loads(json_str)
+                    cred = credentials.Certificate(cred_dict)
+                    print("Loaded credentials from FIREBASE_CREDENTIALS_BASE64")
+                except Exception as e:
+                    print(f"Failed to load base64 credentials: {e}")
+
+            # Option B: Raw JSON String (If platform supports multiline envs)
+            if not cred:
+                cred_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+                if cred_json:
+                    import json
+                    try:
+                        cred_dict = json.loads(cred_json)
+                        cred = credentials.Certificate(cred_dict)
+                        print("Loaded credentials from FIREBASE_CREDENTIALS_JSON")
+                    except Exception as e:
+                         print(f"Failed to load JSON credentials: {e}")
+
+            # Option C: File Path (Local Development)
+            if not cred:
+                cred_path = os.getenv("FIREBASE_SERVICE_KEY")
+                if cred_path and os.path.exists(cred_path):
+                    cred = credentials.Certificate(cred_path)
+                    print(f"Loaded credentials from file: {cred_path}")
+                elif cred_path:
+                    print(f"Warning: Credential file not found at {cred_path}")
+
+            if not cred or not db_url:
+                print("Warning: Firebase Credentials not found. Set FIREBASE_CREDENTIALS_BASE64, FIREBASE_CREDENTIALS_JSON, or FIREBASE_SERVICE_KEY.")
+                if not db_url: print("Warning: FIREBASE_DB_URL not set.")
                 return
 
             try:
-                cred = credentials.Certificate(cred_path)
                 firebase_admin.initialize_app(cred, {
                     'databaseURL': db_url
                 })
