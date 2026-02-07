@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+yt-dlp
+firebase-admin
+pydantic
+python-dotenv
+websockets
+python-multipart
+requests
+pandas
+numpy
+scipy
+implicit
+scikit-learn
