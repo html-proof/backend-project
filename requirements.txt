@@ -12,3 +12,5 @@ numpy
 scipy
 implicit
 scikit-learn
+slowapi
+cachetools
