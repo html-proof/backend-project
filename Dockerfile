@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 # Install system dependencies
+ENV PIP_ROOT_USER_ACTION=ignore
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     gcc \
